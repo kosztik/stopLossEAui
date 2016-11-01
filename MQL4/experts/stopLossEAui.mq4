@@ -22,9 +22,15 @@ double smin, smax, slSell, slBuy, profit;
 
 int hwnd=0;
 
-int Button0, Button1,Button2,Button3,panel, label0, label1;
+int Button0, Button1,Button2,Button3,ButtonADXoff,ButtonADXon,panel, label0, label1;
 
 // Settings
+
+int GUIXadxoff = 350;
+int GUIYadxoff = 50;
+
+int GUIXadxon = 350;
+int GUIYadxon = 100;
 
 int GUIX0 = 50;
 int GUIY0 = 50;
@@ -44,6 +50,7 @@ int GUIX3label1 = 50;
 int GUIY3label1 = 320;
 
 int rsiStopMode=0;
+int adxStopMode=0;
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -76,6 +83,12 @@ void OnDeinit(const int reason)
 void BuildInterface()
   {
   
+   ButtonADXoff=guiAdd(hwnd,"button",GUIXadxoff,GUIYadxoff+ButtonHeight*1+5,220,ButtonHeight,"exit adx off");
+   guiSetBgColor(hwnd,ButtonADXoff,Green);
+   
+   ButtonADXon=guiAdd(hwnd,"button",GUIXadxon,GUIYadxon+ButtonHeight*1+5,220,ButtonHeight,"exit adx on");
+   guiSetBgColor(hwnd,ButtonADXon,Red);
+   
    Button0=guiAdd(hwnd,"button",GUIX0,GUIY0+ButtonHeight*1+5,220,ButtonHeight,"exit rsi off");
    guiSetBgColor(hwnd,Button0,Green);
   
@@ -211,6 +224,58 @@ void rsiStop(int mode) {
         } // end of if       
     } // end of for
 }
+
+/*
+
+                     ADX STOP
+                     DI- �s DI+ fel�lr�l metszi level 20-at.
+
+*/
+void adxStop(int mode) {
+
+   Size = OrdersTotal(); 
+   for (int cnt=0;cnt<Size;cnt++) {
+      OrderSelect(cnt, SELECT_BY_POS, MODE_TRADES);
+      orderType = OrderType(); // megnézem a tipusát, az sl beállítása végett
+      orderSymbol = OrderSymbol(); // DEvizapár
+      StopLevel = MarketInfo(orderSymbol, MODE_STOPLEVEL) + MarketInfo(orderSymbol, MODE_SPREAD);
+      
+      if (orderSymbol == Symbol() ) {
+      
+         /*
+       
+            OP_BUY  0
+   	      OP_SELL 1
+   	   
+   	      csak ezzel a kettő értékkel foglalkozom, semmilyen más tipussal.
+         */
+    
+          //  A Buy is closed with a Sell at Bid, a Sell is closed with a Buy at Ask.
+          if (mode == 1) {
+               // (0 - MODE_MAIN, 1 - MODE_PLUSDI, 2 - MODE_MINUSDI
+               if (orderType == OP_BUY && iADX(orderSymbol,0,14,PRICE_CLOSE,1,1) < 20) {
+                  OrderClose(OrderTicket(),OrderLots(),Bid,3,Red);
+                  
+                  guiSetBgColor(hwnd,ButtonADXon,Green);
+                  guiSetBgColor(hwnd,ButtonADXoff,Red);
+                  
+               }
+               
+               if (orderType == OP_SELL && iADX(orderSymbol,0,14,PRICE_CLOSE,2,1) < 20) {
+                  OrderClose(OrderTicket(),OrderLots(),Ask,3,Red);
+                  
+                  guiSetBgColor(hwnd,ButtonADXon,Green);
+                  guiSetBgColor(hwnd,ButtonADXoff,Red);
+                  
+               }
+           }
+           
+           
+            
+        } // end of if       
+    } // end of for
+}
+
 
 void followSl() {
    Size = OrdersTotal(); 
@@ -361,6 +426,29 @@ void OnTick()
          slSet(1); // Itt mar lehet sl, de ha megint helyre akarom allitani az atr alapu sl-t, akkor lefut!
      }
    
+   
+   if (guiIsClicked(hwnd,ButtonADXoff))
+     {
+     
+         guiSetBgColor(hwnd,ButtonADXoff,Green);
+         guiSetBgColor(hwnd,ButtonADXon,Red);
+                  
+         adxStopMode=0;
+         
+     }
+   if (guiIsClicked(hwnd,ButtonADXon))
+     {
+     
+         guiSetBgColor(hwnd,ButtonADXon,Green);
+         guiSetBgColor(hwnd,ButtonADXoff,Red);
+                  
+         adxStopMode=1;
+         
+     }
+   
+   
+   
+   
    if (guiIsClicked(hwnd,Button0))
      {
      
@@ -394,6 +482,7 @@ void OnTick()
      }
    
    rsiStop(rsiStopMode);
+   adxStop(adxStopMode);
    
        if ( iCustom(Symbol(),0,"ATRStops_v11.1",1,0,1) == Bid ) 
        {
