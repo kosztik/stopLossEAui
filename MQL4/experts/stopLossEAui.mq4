@@ -104,13 +104,13 @@ void BuildInterface()
 // breakevent-be huzas
 void slBrk() {
    
-   double temp_brk; // a tényleges breakevent szint spreaddel
+   double temp_brk; // a tÃ©nyleges breakevent szint spreaddel
    
    Size = OrdersTotal(); 
    for (int cnt=0;cnt<Size;cnt++) {
       OrderSelect(cnt, SELECT_BY_POS, MODE_TRADES);
-      orderType = OrderType(); // megnézem a tipusát, az sl beállítása végett OP_BUY/OP_SELL
-      orderSymbol = OrderSymbol(); // DEvizapár
+      orderType = OrderType(); // megnÃ©zem a tipusÃ¡t, az sl beÃ¡llÃ­tÃ¡sa vÃ©gett OP_BUY/OP_SELL
+      orderSymbol = OrderSymbol(); // DEvizapÃ¡r
       StopLevel = MarketInfo(orderSymbol, MODE_STOPLEVEL) + MarketInfo(orderSymbol, MODE_SPREAD);
       profit = OrderProfit();
       
@@ -131,7 +131,7 @@ void slBrk() {
                  temp_brk = OrderOpenPrice() - NormalizeDouble(Bid - Ask,5);
          }
          
-         // csak akkor nyulok hozzá, ha még nincs breakeventben az sl.
+         // csak akkor nyulok hozzÃ¡, ha mÃ©g nincs breakeventben az sl.
          if (   (temp_brk > OrderStopLoss() &&  orderType == OP_BUY ) || (temp_brk < OrderStopLoss() &&  orderType == OP_SELL)  ) { 
             Print ("breakevent modositas: ", temp_brk);
             bool res=OrderModify(OrderTicket(),OrderOpenPrice(), temp_brk,OrderTakeProfit(),0,Blue);
@@ -156,8 +156,8 @@ void rsiStop(int mode) {
    Size = OrdersTotal(); 
    for (int cnt=0;cnt<Size;cnt++) {
       OrderSelect(cnt, SELECT_BY_POS, MODE_TRADES);
-      orderType = OrderType(); // megnézem a tipusát, az sl beállítása végett
-      orderSymbol = OrderSymbol(); // DEvizapár
+      orderType = OrderType(); // megnÃ©zem a tipusÃ¡t, az sl beÃ¡llÃ­tÃ¡sa vÃ©gett
+      orderSymbol = OrderSymbol(); // DEvizapÃ¡r
       StopLevel = MarketInfo(orderSymbol, MODE_STOPLEVEL) + MarketInfo(orderSymbol, MODE_SPREAD);
       
       if (orderSymbol == Symbol() ) {
@@ -167,22 +167,22 @@ void rsiStop(int mode) {
             OP_BUY  0
    	      OP_SELL 1
    	   
-   	      csak ezzel a kettõ értékkel foglalkozom, semmilyen más tipussal.
+   	      csak ezzel a kettÅ‘ Ã©rtÃ©kkel foglalkozom, semmilyen mÃ¡s tipussal.
          */
     
           //  A Buy is closed with a Sell at Bid, a Sell is closed with a Buy at Ask.
           if (mode == 6040) {
-               if (orderType == OP_BUY && iRSI(orderSymbol,0,14,PRICE_CLOSE,1) < 60) {
+               if (orderType == OP_BUY && iRSI(orderSymbol,0,14,PRICE_CLOSE,1) <= 60) {
                   OrderClose(OrderTicket(),OrderLots(),Bid,3,Red);
-                  rsiStopMode=0;
+                  
                   guiSetBgColor(hwnd,Button0,Green);
                   guiSetBgColor(hwnd,Button1,Red);
                   guiSetBgColor(hwnd,Button2,Red);
                }
                
-               if (orderType == OP_SELL && iRSI(orderSymbol,0,14,PRICE_CLOSE,1) > 40) {
+               if (orderType == OP_SELL && iRSI(orderSymbol,0,14,PRICE_CLOSE,1) >= 40) {
                   OrderClose(OrderTicket(),OrderLots(),Ask,3,Red);
-                  rsiStopMode=0;
+                  
                   guiSetBgColor(hwnd,Button0,Green);
                   guiSetBgColor(hwnd,Button1,Red);
                   guiSetBgColor(hwnd,Button2,Red);
@@ -190,17 +190,17 @@ void rsiStop(int mode) {
            }
            
            if (mode == 50) {
-               if (orderType == OP_BUY && iRSI(orderSymbol,0,14,PRICE_CLOSE,1) < 50) {
+               if (orderType == OP_BUY && iRSI(orderSymbol,0,14,PRICE_CLOSE,1) <= 51) {
                   OrderClose(OrderTicket(),OrderLots(),Bid,3,Red);
-                  rsiStopMode=0;
+                  
                   guiSetBgColor(hwnd,Button0,Green);
                   guiSetBgColor(hwnd,Button1,Red);
                   guiSetBgColor(hwnd,Button2,Red);
                }
                
-               if (orderType == OP_SELL && iRSI(orderSymbol,0,14,PRICE_CLOSE,1) > 50) {
+               if (orderType == OP_SELL && iRSI(orderSymbol,0,14,PRICE_CLOSE,1) >= 49) {
                   OrderClose(OrderTicket(),OrderLots(),Ask,3,Red);
-                  rsiStopMode=0;
+                  
                   guiSetBgColor(hwnd,Button0,Green);
                   guiSetBgColor(hwnd,Button1,Red);
                   guiSetBgColor(hwnd,Button2,Red);
@@ -216,19 +216,19 @@ void followSl() {
    Size = OrdersTotal(); 
    for (int cnt=0;cnt<Size;cnt++) {
       OrderSelect(cnt, SELECT_BY_POS, MODE_TRADES);
-      orderType = OrderType(); // megnézem a tipusát, az sl beállítása végett
-      orderSymbol = OrderSymbol(); // DEvizapár
+      orderType = OrderType(); // megnÃ©zem a tipusÃ¡t, az sl beÃ¡llÃ­tÃ¡sa vÃ©gett
+      orderSymbol = OrderSymbol(); // DEvizapÃ¡r
       StopLevel = MarketInfo(orderSymbol, MODE_STOPLEVEL) + MarketInfo(orderSymbol, MODE_SPREAD);
       /*
     
          OP_BUY  0
 	      OP_SELL 1
 	   
-	      csak ezzel a kettõ értékkel foglalkozom, semmilyen más tipussal.
+	      csak ezzel a kettÅ‘ Ã©rtÃ©kkel foglalkozom, semmilyen mÃ¡s tipussal.
     */
       if (orderType == OP_BUY) {
       
-         slBuy = iCustom(orderSymbol,PERIOD_M15,"ATRStops_v11.1",1,0,1); 
+         slBuy = iCustom(orderSymbol,0,"ATRStops_v11.1",1,0,1); 
         // ha a regi sl kisebb mint az ujabb, koveti
         if (OrderStopLoss() < slBuy && slBuy > OrderOpenPrice() ) {
          
@@ -248,7 +248,7 @@ void followSl() {
     if (orderType == OP_SELL) {
     
       
-      slSell =  iCustom(orderSymbol,PERIOD_M15,"ATRStops_v11.1",1,1,1); 
+      slSell =  iCustom(orderSymbol,0,"ATRStops_v11.1",1,1,1); 
       // akkor ha a regi sl nagyobb mint az uj
       if (OrderStopLoss() > slSell && slSell < OrderOpenPrice() ) {
       bool res=OrderModify(OrderTicket(),OrderOpenPrice(), slSell,OrderTakeProfit(),0,Red);
@@ -264,29 +264,29 @@ void followSl() {
     }
    }
 }
-// ATR-nek megfelelen sl-t állit
+// ATR-nek megfelelen sl-t Ã¡llit
 void slSet(int mode) {
    Size = OrdersTotal(); 
    for (int cnt=0;cnt<Size;cnt++) {
       OrderSelect(cnt, SELECT_BY_POS, MODE_TRADES);
-      orderType = OrderType(); // megnézem a tipusát, az sl beállítása végett
-      orderSymbol = OrderSymbol(); // DEvizapár
+      orderType = OrderType(); // megnÃ©zem a tipusÃ¡t, az sl beÃ¡llÃ­tÃ¡sa vÃ©gett
+      orderSymbol = OrderSymbol(); // DEvizapÃ¡r
       StopLevel = MarketInfo(orderSymbol, MODE_STOPLEVEL) + MarketInfo(orderSymbol, MODE_SPREAD);
       /*
     
          OP_BUY  0
 	      OP_SELL 1
 	   
-	      csak ezzel a kettõ értékkel foglalkozom, semmilyen más tipussal.
+	      csak ezzel a kettÅ‘ Ã©rtÃ©kkel foglalkozom, semmilyen mÃ¡s tipussal.
     */
-     // Ha az adott trade-nek nincs SL-je, akkor beálltja azt:
+     // Ha az adott trade-nek nincs SL-je, akkor beÃ¡lltja azt:
      // Print (OrderStopLoss());
      if (orderSymbol == Symbol() ) {
      
              if (OrderStopLoss() == 0.0 || mode == 1) {
                if (orderType == OP_BUY) {
                
-                  slBuy = iCustom(orderSymbol,PERIOD_M15,"ATRStops_v11.1",1,0,1); 
+                  slBuy = iCustom(orderSymbol,0,"ATRStops_v11.1",1,0,1); 
                
                   bool res=OrderModify(OrderTicket(),OrderOpenPrice(), slBuy,OrderTakeProfit(),0,Blue);
                   if(!res) 
@@ -302,7 +302,7 @@ void slSet(int mode) {
              if (orderType == OP_SELL) {
              
                
-               slSell =  iCustom(orderSymbol,PERIOD_M15,"ATRStops_v11.1",1,1,1); 
+               slSell =  iCustom(orderSymbol,0,"ATRStops_v11.1",1,1,1); 
                
                bool res=OrderModify(OrderTicket(),OrderOpenPrice(), slSell,OrderTakeProfit(),0,Red);
                   if(!res) 
@@ -333,12 +333,12 @@ void OnTick()
 	
    min = Time[0] + PERIOD_M15*60 - CurTime();
    sec = min%60;
-   min =(min - min%60) / 60; // idõszámítások, hogy pontosan tudjam mikor van 15. perc
+   min =(min - min%60) / 60; // idÅ‘szÃ¡mÃ­tÃ¡sok, hogy pontosan tudjam mikor van 15. perc
 
    //Size_now = OrdersTotal(); 
-   //if (Size != Size_now ) slSet();  // ha új pozi van, akkor annak nyomban beállítjuk az sl-t
-                                    // így nem kell várni a köv. 15. percre. 
-                                    // Erre már nincs szükség. folyamatosan vizsgálom.
+   //if (Size != Size_now ) slSet();  // ha Ãºj pozi van, akkor annak nyomban beÃ¡llÃ­tjuk az sl-t
+                                    // Ã­gy nem kell vÃ¡rni a kÃ¶v. 15. percre. 
+                                    // Erre mÃ¡r nincs szÃ¼ksÃ©g. folyamatosan vizsgÃ¡lom.
                      
    if (min != 14) flipflop = 0;
   
@@ -348,7 +348,7 @@ void OnTick()
       
    }
    
-   // figyelem a pozikat és ha valamelyik eléri a küszöböt, akkor  breakeventbe huzom
+   // figyelem a pozikat Ã©s ha valamelyik elÃ©ri a kÃ¼szÃ¶bÃ¶t, akkor  breakeventbe huzom
    //Print (iCustom("USDCAD",PERIOD_M15,"ATRStops_v11.1",1,1,1) );
    //followSl();  
    //slBrk();
